@@ -30,7 +30,7 @@ from util import utils
 def write_examples(job_id, args):
   """A single process creating and writing out pre-processed examples."""
   job_tmp_dir = os.path.join(args.data_dir, "tmp", "job_" + str(job_id))
-  owt_dir = os.path.join(args.data_dir, "openwebtext")
+  owt_dir = os.path.join(args.data_dir, "compressed")
 
   def log(*args):
     msg = " ".join(map(str, args))
@@ -39,7 +39,7 @@ def write_examples(job_id, args):
   log("Creating example writer")
   example_writer = build_pretraining_dataset.ExampleWriter(
       job_id=job_id,
-      vocab_file=os.path.join(args.data_dir, "vocab.txt"),
+      vocab_file=os.path.join(args.data_dir, "nklt_vocab.txt"),
       output_dir=os.path.join(args.data_dir, "pretrain_tfrecords"),
       max_seq_length=args.max_seq_length,
       num_jobs=args.num_processes,

@@ -23,6 +23,8 @@ import argparse
 import collections
 import json
 
+from clearml import Task
+
 import tensorflow.compat.v1 as tf
 
 import configure_pretraining
@@ -455,7 +457,13 @@ def main():
                       help="The name of the model being fine-tuned.")
   parser.add_argument("--hparams", default="{}",
                       help="JSON dict of model hyperparameters.")
+
+  parser.add_argument("--task-name", default="base_tf")
   args = parser.parse_args()
+
+  task = Task.init(project_name="electra", task_name=args.task_name, reuse_last_task_id=False)
+  
+
   if args.hparams.endswith(".json"):
     hparams = utils.load_json(args.hparams)
   else:
