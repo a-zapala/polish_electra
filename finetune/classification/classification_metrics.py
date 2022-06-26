@@ -122,16 +122,14 @@ class ARScorer(SentenceLevelScorer):
 
     def _get_results(self):
         preds = np.array(self._preds).flatten()
-        return [
-            ('wmae', 1 - self.weighted_mean_absolute_error(
-                self._true_labels, preds
-            )/4.0)
-        ]
+        ds = pd.DataFrame({
+            'y_true': (self._true_labels - 1.0) / 4.0,
+            'y_pred': (preds - 1.0) / 4.0,
+        })
+        wmae = ds \
+            .groupby('y_true') \
+            .apply(lambda df: mean_absolute_error(df['y_true'], df['y_pred'])) \
+            .mean()
 
-    @staticmethod
-    def weighted_mean_absolute_error(y_true, y_pred):
-        ds = pd.DataFrame({'y_true': y_true, 'y_pred': y_pred})
-        maes = ds.groupby('y_true').apply(
-            lambda df: mean_absolute_error(df['y_true'], df['y_pred'])
-        )
-        return np.mean(maes)
+        return 1 - wmae
+
