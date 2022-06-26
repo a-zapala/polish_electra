@@ -21,6 +21,7 @@ import os
 import random
 import time
 import tensorflow.compat.v1 as tf
+from transformers import AutoTokenizer
 
 from model import tokenization
 from util import utils
@@ -121,10 +122,11 @@ class ExampleWriter(object):
                num_jobs, blanks_separate_docs, do_lower_case,
                num_out_files=1000, strip_accents=True):
     self._blanks_separate_docs = blanks_separate_docs
-    tokenizer = tokenization.FullTokenizer(
-        vocab_file=vocab_file,
-        do_lower_case=do_lower_case,
-        strip_accents=strip_accents)
+    tokenizer = AutoTokenizer.from_pretrained(
+      "allegro/herbert-base-cased",
+      do_lower_case=do_lower_case,
+      strip_accents=strip_accents,
+    )
     self._example_builder = ExampleBuilder(tokenizer, max_seq_length)
     self._writers = []
     for i in range(num_out_files):
