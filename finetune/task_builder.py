@@ -23,12 +23,15 @@ import configure_finetuning
 from finetune.classification import classification_tasks
 from finetune.qa import qa_tasks
 from finetune.tagging import tagging_tasks
-from model import tokenization
+
+from transformers import AutoTokenizer
 
 
 def get_tasks(config: configure_finetuning.FinetuningConfig):
-    tokenizer = tokenization.FullTokenizer(vocab_file=config.vocab_file,
-                                           do_lower_case=config.do_lower_case)
+    tokenizer = AutoTokenizer.from_pretrained(
+        "allegro/herbert-base-cased",
+        do_lower_case=config.do_lower_case,
+    )
     return [get_task(config, task_name, tokenizer)
             for task_name in config.task_names]
 
