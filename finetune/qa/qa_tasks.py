@@ -289,7 +289,7 @@ class QATask(task.Task):
           all_doc_tokens, tok_start_position, tok_end_position, self._tokenizer,
           example.orig_answer_text)
 
-    # The -3 accounts for [CLS], [SEP] and [SEP]
+    # The -3 accounts for <s>, </s> and </s>
     max_tokens_for_doc = self.config.max_seq_length - len(query_tokens) - 3
 
     # We can have documents that are longer than the maximum sequence length.
@@ -313,12 +313,12 @@ class QATask(task.Task):
       token_to_orig_map = {}
       token_is_max_context = {}
       segment_ids = []
-      tokens.append("[CLS]")
+      tokens.append("<s>")
       segment_ids.append(0)
       for token in query_tokens:
         tokens.append(token)
         segment_ids.append(0)
-      tokens.append("[SEP]")
+      tokens.append("</s>")
       segment_ids.append(0)
 
       for i in range(doc_span.length):
@@ -330,7 +330,7 @@ class QATask(task.Task):
         token_is_max_context[len(tokens)] = is_max_context
         tokens.append(all_doc_tokens[split_token_index])
         segment_ids.append(1)
-      tokens.append("[SEP]")
+      tokens.append("</s>")
       segment_ids.append(1)
 
       input_ids = self._tokenizer.convert_tokens_to_ids(tokens)

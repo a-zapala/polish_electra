@@ -61,7 +61,7 @@ class ExampleBuilder(object):
     if random.random() < 0.1:
       first_segment_target_length = 100000
     else:
-      # -3 due to not yet having [CLS]/[SEP] tokens in the input text
+      # -3 due to not yet having <s>/</s> tokens in the input text
       first_segment_target_length = (self._target_length - 3) // 2
 
     first_segment = []
@@ -79,7 +79,7 @@ class ExampleBuilder(object):
       else:
         second_segment += sentence
 
-    # trim to max_length while accounting for not-yet-added [CLS]/[SEP] tokens
+    # trim to max_length while accounting for not-yet-added <s>/</s> tokens
     first_segment = first_segment[:self._max_length - 2]
     second_segment = second_segment[:max(0, self._max_length -
                                          len(first_segment) - 3)]
@@ -98,10 +98,10 @@ class ExampleBuilder(object):
   def _make_tf_example(self, first_segment, second_segment):
     """Converts two "segments" of text into a tf.train.Example."""
     vocab = self._tokenizer.vocab
-    input_ids = [vocab["[CLS]"]] + first_segment + [vocab["[SEP]"]]
+    input_ids = [vocab["<s>"]] + first_segment + [vocab["</s>"]]
     segment_ids = [0] * len(input_ids)
     if second_segment:
-      input_ids += second_segment + [vocab["[SEP]"]]
+      input_ids += second_segment + [vocab["</s>"]]
       segment_ids += [1] * (len(second_segment) + 1)
     input_mask = [1] * len(input_ids)
     input_ids += [0] * (self._max_length - len(input_ids))

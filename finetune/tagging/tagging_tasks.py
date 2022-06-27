@@ -130,9 +130,9 @@ class TaggingTask(task.Task):
     tagged_positions = []
     for word_tokens in words_to_tokens:
       if len(words_to_tokens) + len(input_ids) + 1 > self.config.max_seq_length:
-        input_ids.append(self._tokenizer.vocab["[SEP]"])
+        input_ids.append(self._tokenizer.vocab["</s>"])
         break
-      if "[CLS]" not in word_tokens and "[SEP]" not in word_tokens:
+      if "<s>" not in word_tokens and "</s>" not in word_tokens:
         tagged_positions.append(len(input_ids))
       for token in word_tokens:
         input_ids.append(self._tokenizer.vocab[token])
@@ -225,13 +225,13 @@ class TaggingTask(task.Task):
 
 def tokenize_and_align(tokenizer, words, cased=False):
   """Splits up words into subword-level tokens."""
-  words = ["[CLS]"] + list(words) + ["[SEP]"]
+  words = ["<s>"] + list(words) + ["</s>"]
   basic_tokenizer = tokenizer.basic_tokenizer
   tokenized_words = []
   for word in words:
     word = tokenization.convert_to_unicode(word)
     word = basic_tokenizer._clean_text(word)
-    if word == "[CLS]" or word == "[SEP]":
+    if word == "<s>" or word == "</s>":
       word_toks = [word]
     else:
       if not cased:

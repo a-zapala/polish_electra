@@ -54,8 +54,12 @@ class SingleOutputTask(task.Task):
         self._tokenizer = tokenizer
 
     def get_examples(self, split):
+        if split == "test":
+            split_name = "test_features"
+        else:
+            split_name = split
         return self._create_examples(read_tsv(
-            os.path.join(self.config.raw_data_dir(self.name), split + ".tsv"),
+            os.path.join(self.config.raw_data_dir(self.name), split_name + ".tsv"),
             max_lines=100 if self.config.debug else None), split)
 
     @abc.abstractmethod
@@ -72,46 +76,46 @@ class SingleOutputTask(task.Task):
         if tokens_b:
             # Modifies `tokens_a` and `tokens_b` in place so that the total
             # length is less than the specified length.
-            # Account for [CLS], [SEP], [SEP] with "- 3"
+            # Account for <s>, </s>, </s> with "- 3"
             _truncate_seq_pair(tokens_a, tokens_b, self.config.max_seq_length - 3)
         else:
-            # Account for [CLS] and [SEP] with "- 2"
+            # Account for <s> and </s> with "- 2"
             if len(tokens_a) > self.config.max_seq_length - 2:
                 tokens_a = tokens_a[0:(self.config.max_seq_length - 2)]
 
         # The convention in BERT is:
         # (a) For sequence pairs:
-        #  tokens:   [CLS] is this jack ##son ##ville ? [SEP] no it is not . [SEP]
+        #  tokens:   <s> is this jack ##son ##ville ? </s> no it is not . </s>
         #  type_ids: 0     0  0    0    0     0       0 0     1  1  1  1   1 1
         # (b) For single sequences:
-        #  tokens:   [CLS] the dog is hairy . [SEP]
+        #  tokens:   <s> the dog is hairy . </s>
         #  type_ids: 0     0   0   0  0     0 0
         #
         # Where "type_ids" are used to indicate whether this is the first
         # sequence or the second sequence. The embedding vectors for `type=0` and
         # `type=1` were learned during pre-training and are added to the wordpiece
         # embedding vector (and position vector). This is not *strictly* necessary
-        # since the [SEP] token unambiguously separates the sequences, but it
+        # since the </s> token unambiguously separates the sequences, but it
         # makes it easier for the model to learn the concept of sequences.
         #
-        # For classification tasks, the first vector (corresponding to [CLS]) is
+        # For classification tasks, the first vector (corresponding to <s>) is
         # used as the "sentence vector". Note that this only makes sense because
         # the entire model is fine-tuned.
         tokens = []
         segment_ids = []
-        tokens.append("[CLS]")
+        tokens.append("<s>")
         segment_ids.append(0)
         for token in tokens_a:
             tokens.append(token)
             segment_ids.append(0)
-        tokens.append("[SEP]")
+        tokens.append("</s>")
         segment_ids.append(0)
 
         if tokens_b:
             for token in tokens_b:
                 tokens.append(token)
                 segment_ids.append(1)
-            tokens.append("[SEP]")
+            tokens.append("</s>")
             segment_ids.append(1)
 
         input_ids = self._tokenizer.convert_tokens_to_ids(tokens)
@@ -171,6 +175,7 @@ class SingleOutputTask(task.Task):
                 examples.append(InputExample(eid=eid, task_name=self.name,
                                              text_a=text_a, text_b=text_b, label=label))
             except Exception as ex:
+
                 utils.log("Error constructing example from line", i,
                           "for task", self.name + ":", ex)
                 utils.log("Input causing the error:", line)
@@ -459,7 +464,7 @@ class CBD(ClassificationTask):
     """CBD classification."""
 
     def __init__(self, config: configure_finetuning.FinetuningConfig, tokenizer):
-        super(CBD, self).__init__(config, "cbd", tokenizer, [0, 1])
+        super(CBD, self).__init__(config, "cbd", tokenizer, ["0", "1"])
 
     def _create_examples(self, lines, split):
         if split == "test":
@@ -504,7 +509,7 @@ class DYK(ClassificationTask):
     """DYK classification."""
 
     def __init__(self, config: configure_finetuning.FinetuningConfig, tokenizer):
-        super(DYK, self).__init__(config, "dyk", tokenizer, [0, 1])
+        super(DYK, self).__init__(config, "dyk", tokenizer, ["0", "1"])
 
     def _create_examples(self, lines, split):
         if split == "test":
@@ -570,7 +575,7 @@ class PSC(ClassificationTask):
     """PSC classification."""
 
     def __init__(self, config: configure_finetuning.FinetuningConfig, tokenizer):
-        super(PSC, self).__init__(config, "psc", tokenizer, [0, 1])
+        super(PSC, self).__init__(config, "psc", tokenizer, ["0", "1"])
 
     def _create_examples(self, lines, split):
         if split == "test":

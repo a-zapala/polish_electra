@@ -131,9 +131,11 @@ class Preprocessor(object):
       else:
         values = spec.get_default_values()
       if (isinstance(values, int) or isinstance(values, bool) or
-          isinstance(values, float) or isinstance(values, np.float32) or
-          (isinstance(values, np.ndarray) and values.size == 1)):
+          isinstance(values, float) or isinstance(values, np.float32)):
         values = [values]
+      elif (isinstance(values, np.ndarray) and values.size == 1):
+        values = [values.item()]
+        
       if spec.is_int_feature:
         feature = tf.train.Feature(int64_list=tf.train.Int64List(
             value=list(values)))

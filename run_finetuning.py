@@ -23,6 +23,8 @@ import argparse
 import collections
 import json
 
+from clearml import Task
+
 import tensorflow.compat.v1 as tf
 
 import configure_finetuning
@@ -311,11 +313,19 @@ def main():
                         help="The name of the model being fine-tuned.")
     parser.add_argument("--hparams", default="{}",
                         help="JSON dict of model hyperparameters.")
+    
+    parser.add_argument("--task-name", default="base_tf_finetuning")
+
     args = parser.parse_args()
+
+    
     if args.hparams.endswith(".json"):
         hparams = utils.load_json(args.hparams)
     else:
         hparams = json.loads(args.hparams)
+
+
+    task = Task.init(project_name="klej", task_name=args.task_name +'_' + '_'.join(hparams['task_names']), reuse_last_task_id=False)
     tf.logging.set_verbosity(tf.logging.ERROR)
     run_finetuning(configure_finetuning.FinetuningConfig(
         args.model_name, args.data_dir, **hparams))

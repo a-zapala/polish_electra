@@ -22,6 +22,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from transformers import AutoTokenizer
+
 import tensorflow.compat.v1 as tf
 
 import configure_pretraining
@@ -121,8 +123,10 @@ VOCAB_MAPPING = {}
 def get_vocab(config: configure_pretraining.PretrainingConfig):
   """Memoized load of the vocab file."""
   if config.vocab_file not in VOCAB_MAPPING:
-    vocab = tokenization.FullTokenizer(
-        config.vocab_file, do_lower_case=True).vocab
+    vocab =  AutoTokenizer.from_pretrained(
+      "allegro/herbert-base-cased",
+      do_lower_case=True,
+    ).vocab
     VOCAB_MAPPING[config.vocab_file] = vocab
   return VOCAB_MAPPING[config.vocab_file]
 
@@ -132,7 +136,7 @@ def get_candidates_mask(config: configure_pretraining.PretrainingConfig,
                         disallow_from_mask=None):
   """Returns a mask tensor of positions in the input that can be masked out."""
   vocab = get_vocab(config)
-  ignore_ids = [vocab["[SEP]"], vocab["[CLS]"], vocab["[MASK]"]]
+  ignore_ids = [vocab["</s>"], vocab["<s>"], vocab["<mask>"]]
   candidates_mask = tf.ones_like(inputs.input_ids, tf.bool)
   for ignore_id in ignore_ids:
     candidates_mask &= tf.not_equal(inputs.input_ids, ignore_id)
@@ -201,7 +205,7 @@ def mask(config: configure_pretraining.PretrainingConfig,
   replace_with_mask_positions = masked_lm_positions * tf.cast(
       tf.less(tf.random.uniform([B, N]), 0.85), tf.int32)
   inputs_ids, _ = scatter_update(
-      inputs.input_ids, tf.fill([B, N], vocab["[MASK]"]),
+      inputs.input_ids, tf.fill([B, N], vocab["<mask>"]),
       replace_with_mask_positions)
 
   return pretrain_data.get_updated_inputs(
