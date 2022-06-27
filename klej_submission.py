@@ -29,7 +29,7 @@ if __name__ == "__main__":
         help="Directory with pickled test predictions for specified tasks.",
     )
     parser.add_argument("--output_directory", type=str, required=True)
-    parser.add_argument("--task_names", type=list, required=True)
+    parser.add_argument("--task_names", required=True, nargs="+")
 
     args = parser.parse_args()
     input_dir = pathlib.Path(args.input_directory)
@@ -37,11 +37,11 @@ if __name__ == "__main__":
     
     for task_name in args.task_names:
         logits = pickle.load(open(
-            input_dir / f"{task_name}.pckl", "rb"
+            input_dir / f"{task_name}_test_1_predictions.pkl", "rb"
         ))
         logits = torch.tensor(np.array(list(logits.values())))
         # classification tasks
-        if torch.shape[1] > 1:
+        if logits.shape[1] > 1:
             probability = torch.nn.functional.softmax(logits)
             labels = torch.argmax(probability, axis=1)
             pred = [LABELS[task_name][l] for l in labels]
@@ -55,9 +55,3 @@ if __name__ == "__main__":
         pd.DataFrame({'target': pred}).to_csv(
             output_dir / f"test_pred_{task_name}.tsv", index=False
         )
-
-    # zip into format compatible with KLEJ submission
-    subprocess.run(
-        'zip -r "${output_dir}.zip" "${output_dir}"',
-        shell=True,
-    )
