@@ -450,9 +450,11 @@ class AR(RegressionTask):
     def __init__(self, config: configure_finetuning.FinetuningConfig, tokenizer):
         super(AR, self).__init__(config, "ar", tokenizer, 1.0, 5.0)
 
+    def _get_dummy_label(self):
+        return 1.0
+
     def _create_examples(self, lines, split):
         if split == "test":
-            split += "_features"
             return self._load_glue(lines, split, 0, None, None, skip_first_line=True)
         return self._load_glue(lines, split, 0, None, 1, skip_first_line=True)
 
@@ -468,7 +470,6 @@ class CBD(ClassificationTask):
 
     def _create_examples(self, lines, split):
         if split == "test":
-            split += "_features"
             return self._load_glue(lines, split, 0, None, None, skip_first_line=True)
         return self._load_glue(lines, split, 0, None, 1, skip_first_line=True)
 
@@ -487,7 +488,6 @@ class CDSCE(ClassificationTask):
 
     def _create_examples(self, lines, split):
         if split == "test":
-            split += "_features"
             return self._load_glue(lines, split, 1, 2, None, skip_first_line=True)
         return self._load_glue(lines, split, 1, 2, 3, skip_first_line=True)
 
@@ -500,7 +500,6 @@ class CDSCR(RegressionTask):
 
     def _create_examples(self, lines, split):
         if split == "test":
-            split += "_features"
             return self._load_glue(lines, split, 1, 2, None, skip_first_line=True)
         return self._load_glue(lines, split, 1, 2, 3, skip_first_line=True)
 
@@ -513,7 +512,6 @@ class DYK(ClassificationTask):
 
     def _create_examples(self, lines, split):
         if split == "test":
-            split += "_features"
             return self._load_glue(lines, split, 1, 2, None, skip_first_line=True)
         return self._load_glue(lines, split, 1, 2, 3, skip_first_line=True)
 
@@ -532,8 +530,7 @@ class NKJP(ClassificationTask):
 
     def _create_examples(self, lines, split):
         if split == "test":
-            split += "_features"
-            return self._load_glue(lines, split, 1, None, None, skip_first_line=True)
+            return self._load_glue(lines, split, 0, None, None, skip_first_line=True)
         return self._load_glue(lines, split, 0, None, 1, skip_first_line=True)
 
 
@@ -549,7 +546,6 @@ class PolEmoIn(ClassificationTask):
 
     def _create_examples(self, lines, split):
         if split == "test":
-            split += "_features"
             return self._load_glue(lines, split, 0, None, None, skip_first_line=True)
         return self._load_glue(lines, split, 0, None, 1, skip_first_line=True)
 
@@ -566,7 +562,6 @@ class PolEmoOut(ClassificationTask):
 
     def _create_examples(self, lines, split):
         if split == "test":
-            split += "_features"
             return self._load_glue(lines, split, 0, None, None, skip_first_line=True)
         return self._load_glue(lines, split, 0, None, 1, skip_first_line=True)
 
@@ -579,7 +574,6 @@ class PSC(ClassificationTask):
 
     def _create_examples(self, lines, split):
         if split == "test":
-            split += "_features"
             return self._load_glue(lines, split, 0, 1, None, skip_first_line=True)
         return self._load_glue(lines, split, 0, 1, 2, skip_first_line=True)
 
